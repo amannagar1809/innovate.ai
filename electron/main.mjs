@@ -7,16 +7,36 @@ import {
 import path from "node:path";
 
 const isDevelopment = !app.isPackaged;
+let mainWindow = null;
 
 function createWindow() {
   const window = new BrowserWindow({
     width: 1280,
     height: 800,
+    minWidth: 900,
+    minHeight: 600,
+    title: "INNOVATE AI",
+    resizable: true,
+    frame: true,
+    minimizable: true,
+    maximizable: true,
+    closable: true,
+    show: false,
     webPreferences: {
       preload: path.join(import.meta.dirname, "preload.mjs"),
       contextIsolation: true,
       nodeIntegration: false,
     },
+  });
+  mainWindow = window;
+
+  window.once("ready-to-show", () => window.show());
+  window.on("focus", () => window.webContents.send("window:focus"));
+  window.on("blur", () => window.webContents.send("window:blur"));
+  window.on("closed", () => {
+    if (mainWindow === window) {
+      mainWindow = null;
+    }
   });
 
   if (isDevelopment) {
