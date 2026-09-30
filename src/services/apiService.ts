@@ -45,6 +45,10 @@ export const getErrorMessage = (error: unknown): string => {
     return error;
   }
 
+  if (error instanceof Error) {
+    return error.message;
+  }
+
   if (error && typeof error === "object" && "response" in error) {
     const axiosError = error as {
       response?: { data?: { message?: string } };

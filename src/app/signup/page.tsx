@@ -1,23 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { FormEvent, useEffect, useState } from "react";
-import { authService } from "@/services/authService";
+import { FormEvent, useState } from "react";
 import { getErrorMessage } from "@/services/apiService";
+import { authService } from "@/services/authService";
 
-export default function Home() {
-  const router = useRouter();
+export default function SignupPage() {
+  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [mobileNumber, setMobileNumber] = useState("");
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  useEffect(() => {
-    if (window.localStorage.getItem("access_token")) {
-      router.replace("/dashboard");
-    }
-  }, [router]);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -25,9 +19,9 @@ export default function Home() {
     setIsSubmitting(true);
 
     try {
-      await authService.login({ email, password });
+      const response = await authService.register({ fullName, email, password, mobileNumber });
       setPassword("");
-      router.push("/dashboard");
+      setMessage(response.message ?? "User registered successfully. You can now sign in.");
     } catch (error) {
       setMessage(getErrorMessage(error));
     } finally {
@@ -40,13 +34,25 @@ export default function Home() {
       <section className="w-full max-w-md rounded-lg border border-zinc-200 bg-white p-8 shadow-sm">
         <div className="mb-8">
           <p className="text-sm font-semibold text-emerald-700">INNOVATE AI</p>
-          <h1 className="mt-3 text-3xl font-semibold">Welcome back</h1>
-          <p className="mt-2 text-sm text-zinc-600">
-            Sign in to continue to your account.
-          </p>
+          <h1 className="mt-3 text-3xl font-semibold">Create your account</h1>
+          <p className="mt-2 text-sm text-zinc-600">Enter your details to get started.</p>
         </div>
 
-        <form className="space-y-5" onSubmit={handleSubmit}>
+        <form className="space-y-5" method="post" onSubmit={handleSubmit}>
+          <div className="space-y-2">
+            <label className="text-sm font-medium" htmlFor="fullName">Full name</label>
+            <input
+              autoComplete="name"
+              className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-emerald-700 focus:ring-2 focus:ring-emerald-700/20"
+              id="fullName"
+              name="fullName"
+              onChange={(event) => setFullName(event.target.value)}
+              required
+              type="text"
+              value={fullName}
+            />
+          </div>
+
           <div className="space-y-2">
             <label className="text-sm font-medium" htmlFor="email">Email</label>
             <input
@@ -62,9 +68,23 @@ export default function Home() {
           </div>
 
           <div className="space-y-2">
+            <label className="text-sm font-medium" htmlFor="mobileNumber">Mobile number</label>
+            <input
+              autoComplete="tel"
+              className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-emerald-700 focus:ring-2 focus:ring-emerald-700/20"
+              id="mobileNumber"
+              name="mobileNumber"
+              onChange={(event) => setMobileNumber(event.target.value)}
+              required
+              type="tel"
+              value={mobileNumber}
+            />
+          </div>
+
+          <div className="space-y-2">
             <label className="text-sm font-medium" htmlFor="password">Password</label>
             <input
-              autoComplete="current-password"
+              autoComplete="new-password"
               className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-emerald-700 focus:ring-2 focus:ring-emerald-700/20"
               id="password"
               name="password"
@@ -80,7 +100,7 @@ export default function Home() {
             disabled={isSubmitting}
             type="submit"
           >
-            {isSubmitting ? "Signing in..." : "Sign in"}
+            {isSubmitting ? "Creating account..." : "Create account"}
           </button>
 
           {message && (
@@ -91,12 +111,11 @@ export default function Home() {
         </form>
 
         <p className="mt-5 text-center text-sm text-zinc-600">
-          Don&apos;t have an account?{" "}
-          <Link className="font-medium text-emerald-800 underline-offset-4 hover:underline" href="/signup">
-            Create one
+          Already registered?{" "}
+          <Link className="font-medium text-emerald-800 underline-offset-4 hover:underline" href="/">
+            Sign in
           </Link>
         </p>
-
       </section>
     </main>
   );

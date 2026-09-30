@@ -1,8 +1,8 @@
 import axios, { type AxiosError, type AxiosInstance, type AxiosRequestConfig } from "axios";
 
 const api: AxiosInstance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000/api",
-  timeout: 10000,
+  baseURL: process.env.NEXT_PUBLIC_API_URL ?? "https://innovate-ai-be.onrender.com/api",
+  timeout: 60000,
   headers: {
     "Content-Type": "application/json",
   },
@@ -25,7 +25,6 @@ api.interceptors.response.use(
   (error: AxiosError) => {
     if (typeof window !== "undefined" && error.response?.status === 401) {
       window.localStorage.removeItem("access_token");
-      window.location.assign("/login");
     }
 
     return Promise.reject(error);
